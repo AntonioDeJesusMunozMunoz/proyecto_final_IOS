@@ -37,12 +37,15 @@ struct ContentView: View {
             .padding() // Margen interno para los marcadores
             Spacer()
             ZStack{
-                ForEach(cuerpo.indices){i in
+                ForEach(cuerpo.indices, id:\.self){i in
                     RoundedRectangle(cornerRadius: 5)
-                        .position(x: CGFloat(cuerpo[i].x * celSize),y: CGFloat(cuerpo[i].y * celSize))
+                        .offset(x: CGFloat(cuerpo[i].x * celSize),y: CGFloat(cuerpo[i].y * celSize))
+                        .frame(width:CGFloat(celSize),height:CGFloat(celSize))
+                        .foregroundColor(.green)
                 }
                 RoundedRectangle(cornerRadius: 5)
                     .position(x:CGFloat(manzanaCoord.x * celSize), y: CGFloat(manzanaCoord.y * celSize))
+                    .foregroundColor(.red)
             }.gesture(DragGesture().onEnded{value in guardarDireccion(value)})
             Spacer() // Empuja los marcadores arriba y el botón abajo
             
