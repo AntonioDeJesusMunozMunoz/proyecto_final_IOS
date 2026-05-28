@@ -15,12 +15,13 @@ struct coord : Hashable {
 
 struct ContentView: View {
     let celSize = 25
-    @State private var manzanaCoord: (x:Int, y:Int) = (15,16)
-    @State private var cuerpo:Array<coord> = [(x:12,y:12)]
+    @State private var manzanaCoord: coord = coord(x:15,y:16)
+    @State private var manzanaComida = false
+    @State private var cuerpo:Array<coord> = [coord(x:12,y:12)]
     @State private var direccion:Array<CGFloat> = [0,0]
     @State private var highscore: Int = 0
     @State private var score: Int = 0
-    @State private var bodySet:Set<coord>
+    @State private var bodySet:Set<coord> = Set()
     @State private var juegoCorriendo = false
 
     var body: some View {
@@ -35,11 +36,13 @@ struct ContentView: View {
             }
             .padding() // Margen interno para los marcadores
             Spacer()
-            VStack{
+            ZStack{
                 ForEach(cuerpo.indices){i in
                     RoundedRectangle(cornerRadius: 5)
-                        .position(x: CGFloat(cuerpo[i].0 * celSize),y: CGFloat(cuerpo[i].1 * celSize))
+                        .position(x: CGFloat(cuerpo[i].x * celSize),y: CGFloat(cuerpo[i].y * celSize))
                 }
+                RoundedRectangle(cornerRadius: 5)
+                    .position(x:CGFloat(manzanaCoord.x * celSize), y: CGFloat(manzanaCoord.y * celSize))
             }.gesture(DragGesture().onEnded{value in guardarDireccion(value)})
             Spacer() // Empuja los marcadores arriba y el botón abajo
             
@@ -71,6 +74,7 @@ struct ContentView: View {
         //Estoy usando un timer como "game loop", la vdd esto solo funciona porque es el juego
         //de la serpiente
         Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true){timer in
+            ///SERPIENTE
             //muevo la serpiente
             var lastPos = cuerpo[0]
             
@@ -82,24 +86,39 @@ struct ContentView: View {
                 var auxPos = cuerpo[i]
                 cuerpo[i] = lastPos
                 lastPos = auxPos
+                
+                i += 1
             }
             
             //checo si choca con algo
             //cuerpo
-            bodySet = Set(cuerpo.remove(at: 0))
-            if cuerpo[0] in bodySet{
+            bodySet = Set(cuerpo[1...])
+            if bodySet.contains(cuerpo[0]){
                 perder(timer)
             }
             //pared
-            if cuerpo[0].x > 25 ||cuerpo[0].x < 0 || cuerpo[0].y > 25 || cuerpo[0].y < 0{
+            if cuerpo[0].x > 25 || cuerpo[0].x < 0 || cuerpo[0].y > 25 || cuerpo[0].y < 0{
                 perder(timer)
+            }
+            
+            ///MANZANA
+            if manzanaComida { //si fue comida, se mueve
+                manzanaCoord = randCoord()
+            } else { //si no, checa si fue comida
+                if cuerpo[0] == manzanaCoord{
+                    manzanaComida = true
+                }
             }
         }
     }
     
-    func perder(_ timer){
+    func perder(_ timer:Timer){
         juegoCorriendo = false
         timer.invalidate()
+    }
+    
+    func randCoord() -> coord{
+        return coord(x:Int.random(in: 0...25),y:Int.random(in: 0...25))
     }
 
 }
