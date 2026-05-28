@@ -14,10 +14,10 @@ struct coord : Hashable {
 
 struct ContentView: View {
     let celSize = 15
-    @State private var manzanaCoord: coord = coord(x:5,y:6)
+    @State private var manzanaCoord: coord = coord(x:6,y:7)
     @State private var manzanaComida = false
     @State private var cuerpo:Array<coord> = [coord(x:5,y:6),coord(x:5,y:5)]
-    @State private var direccion:Array<CGFloat> = [0,0]
+    @State private var direccion:Array<CGFloat> = [-1,0]
     @State private var highscore: Int = 0
     @State private var score: Int = 0
     @State private var bodySet:Set<coord> = Set()
@@ -39,19 +39,20 @@ struct ContentView: View {
                 //serpiente
                 ForEach(cuerpo.indices, id:\.self){i in
                     RoundedRectangle(cornerRadius: 5)
-                        .offset(x: CGFloat(cuerpo[i].x * celSize),y: CGFloat(cuerpo[i].y * celSize))
+                        .offset(x: CGFloat(cuerpo[i].x * celSize - 12 * celSize - celSize/2) ,y: CGFloat(cuerpo[i].y * celSize - 12 * celSize - celSize/2))
                         .frame(width:CGFloat(celSize),height:CGFloat(celSize))
                         .foregroundColor(.green)
                 }
                 
                 //manzana
                 RoundedRectangle(cornerRadius: 5)
-                    .offset(x:CGFloat(manzanaCoord.x * celSize), y: CGFloat(manzanaCoord.y * celSize))
+                    .offset(x:CGFloat(manzanaCoord.x * celSize  - 12 * celSize), y: CGFloat(manzanaCoord.y * celSize  - 12 * celSize))
                     .foregroundColor(.red)
                     .frame(width:CGFloat(celSize),height:CGFloat(celSize))
-            }.gesture(DragGesture().onEnded{value in guardarDireccion(value)})
-                .frame(width:CGFloat(25 * celSize), height: CGFloat(25 * celSize))
+                
+            }   .frame(width:CGFloat(24 * celSize), height: CGFloat(24 * celSize))
                 .background(.gray)
+                .gesture(DragGesture().onEnded{value in guardarDireccion(value)})
             Spacer() // Empuja los marcadores arriba y el botón abajo
             
             //Botón de JUGAR
@@ -78,13 +79,14 @@ struct ContentView: View {
             direccion[0] = 0
             direccion[1] = value.translation.height/abs(value.translation.height)
         }
+        print("RAAAAAAA \(direccion)")
     }
     
     func iniciarJuego() -> Void{
         //Estoy usando un timer como "game loop", la vdd esto solo funciona porque es el juego
         //de la serpiente
         juegoCorriendo = true
-        Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true){timer in
+        Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true){timer in
             ///SERPIENTE
             //muevo la serpiente
             var lastPos = cuerpo[0]
@@ -110,10 +112,10 @@ struct ContentView: View {
             //cuerpo
             bodySet = Set(cuerpo[1...])
             if bodySet.contains(cuerpo[0]){
-                perder(timer)
+                //perder(timer)
             }
             //pared
-            if cuerpo[0].x > 25 * celSize || cuerpo[0].x < 0 || cuerpo[0].y > 25 * celSize || cuerpo[0].y < 0{
+            if cuerpo[0].x > 25 || cuerpo[0].x < 0 || cuerpo[0].y > 25 || cuerpo[0].y < 0{
                 perder(timer)
             }
             
@@ -139,7 +141,7 @@ struct ContentView: View {
         manzanaCoord = randCoord()
         manzanaComida = false
         cuerpo = [coord(x:5,y:6),coord(x:5,y:5)]
-        direccion = [0,0]
+        direccion = [-1,0]
         score = 0
         bodySet = Set(cuerpo[1...])
         juegoCorriendo = false
