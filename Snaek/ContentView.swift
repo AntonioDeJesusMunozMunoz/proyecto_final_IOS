@@ -13,7 +13,7 @@ struct coord : Hashable {
 }
 
 struct ContentView: View {
-    let celSize = 10
+    let celSize = 15
     @State private var manzanaCoord: coord = coord(x:5,y:6)
     @State private var manzanaComida = false
     @State private var cuerpo:Array<coord> = [coord(x:5,y:6),coord(x:5,y:5)]
@@ -36,14 +36,17 @@ struct ContentView: View {
             .padding() // Margen interno para los marcadores
             Spacer()
             ZStack{
+                //serpiente
                 ForEach(cuerpo.indices, id:\.self){i in
                     RoundedRectangle(cornerRadius: 5)
-                        .position(x: CGFloat(cuerpo[i].x * celSize),y: CGFloat(cuerpo[i].y * celSize))
+                        .offset(x: CGFloat(cuerpo[i].x * celSize),y: CGFloat(cuerpo[i].y * celSize))
                         .frame(width:CGFloat(celSize),height:CGFloat(celSize))
                         .foregroundColor(.green)
                 }
+                
+                //manzana
                 RoundedRectangle(cornerRadius: 5)
-                    .position(x:CGFloat(manzanaCoord.x * celSize), y: CGFloat(manzanaCoord.y * celSize))
+                    .offset(x:CGFloat(manzanaCoord.x * celSize), y: CGFloat(manzanaCoord.y * celSize))
                     .foregroundColor(.red)
                     .frame(width:CGFloat(celSize),height:CGFloat(celSize))
             }.gesture(DragGesture().onEnded{value in guardarDireccion(value)})
@@ -110,7 +113,7 @@ struct ContentView: View {
                 perder(timer)
             }
             //pared
-            if cuerpo[0].x > 25 || cuerpo[0].x < 0 || cuerpo[0].y > 25 || cuerpo[0].y < 0{
+            if cuerpo[0].x > 25 * celSize || cuerpo[0].x < 0 || cuerpo[0].y > 25 * celSize || cuerpo[0].y < 0{
                 perder(timer)
             }
             
@@ -143,7 +146,7 @@ struct ContentView: View {
     }
     
     func randCoord() -> coord{
-        return coord(x:Int.random(in: 0...25),y:Int.random(in: 0...25))
+        return coord(x:Int.random(in: 0...24),y:Int.random(in: 0...24))
     }
 
 }
