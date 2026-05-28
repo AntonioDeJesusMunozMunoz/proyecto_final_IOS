@@ -8,13 +8,12 @@
 import SwiftUI
 
 struct coord : Hashable {
-    let id = UUID()
     var x:Int
     var y:Int
 }
 
 struct ContentView: View {
-    let celSize = 25
+    let celSize = 10
     @State private var manzanaCoord: coord = coord(x:15,y:16)
     @State private var manzanaComida = false
     @State private var cuerpo:Array<coord> = [coord(x:12,y:12)]
@@ -39,14 +38,16 @@ struct ContentView: View {
             ZStack{
                 ForEach(cuerpo.indices, id:\.self){i in
                     RoundedRectangle(cornerRadius: 5)
-                        .offset(x: CGFloat(cuerpo[i].x * celSize),y: CGFloat(cuerpo[i].y * celSize))
+                        .position(x: CGFloat(cuerpo[i].x * celSize),y: CGFloat(cuerpo[i].y * celSize))
                         .frame(width:CGFloat(celSize),height:CGFloat(celSize))
                         .foregroundColor(.green)
                 }
                 RoundedRectangle(cornerRadius: 5)
                     .position(x:CGFloat(manzanaCoord.x * celSize), y: CGFloat(manzanaCoord.y * celSize))
                     .foregroundColor(.red)
+                    .frame(width:CGFloat(celSize),height:CGFloat(celSize))
             }.gesture(DragGesture().onEnded{value in guardarDireccion(value)})
+                .frame(width:CGFloat(25 * celSize), height: CGFloat(25 * celSize))
             Spacer() // Empuja los marcadores arriba y el botón abajo
             
             //Botón de JUGAR
@@ -76,6 +77,7 @@ struct ContentView: View {
     func iniciarJuego() -> Void{
         //Estoy usando un timer como "game loop", la vdd esto solo funciona porque es el juego
         //de la serpiente
+        juegoCorriendo = true
         Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true){timer in
             ///SERPIENTE
             //muevo la serpiente
@@ -85,12 +87,17 @@ struct ContentView: View {
             cuerpo[0].y += Int(direccion[1])
             
             var i = 1
+            var auxPos = cuerpo[i]
             while i < cuerpo.count{
-                var auxPos = cuerpo[i]
+                auxPos = cuerpo[i]
                 cuerpo[i] = lastPos
                 lastPos = auxPos
                 
                 i += 1
+            }
+            
+            if manzanaComida{
+                cuerpo.append(lastPos)
             }
             
             //checo si choca con algo
@@ -107,9 +114,11 @@ struct ContentView: View {
             ///MANZANA
             if manzanaComida { //si fue comida, se mueve
                 manzanaCoord = randCoord()
+                manzanaComida = false
             } else { //si no, checa si fue comida
                 if cuerpo[0] == manzanaCoord{
                     manzanaComida = true
+                    score += 100
                 }
             }
         }
