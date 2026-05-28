@@ -14,9 +14,9 @@ struct coord : Hashable {
 
 struct ContentView: View {
     let celSize = 10
-    @State private var manzanaCoord: coord = coord(x:15,y:16)
+    @State private var manzanaCoord: coord = coord(x:5,y:6)
     @State private var manzanaComida = false
-    @State private var cuerpo:Array<coord> = [coord(x:12,y:12)]
+    @State private var cuerpo:Array<coord> = [coord(x:5,y:6),coord(x:5,y:5)]
     @State private var direccion:Array<CGFloat> = [0,0]
     @State private var highscore: Int = 0
     @State private var score: Int = 0
@@ -48,6 +48,7 @@ struct ContentView: View {
                     .frame(width:CGFloat(celSize),height:CGFloat(celSize))
             }.gesture(DragGesture().onEnded{value in guardarDireccion(value)})
                 .frame(width:CGFloat(25 * celSize), height: CGFloat(25 * celSize))
+                .background(.gray)
             Spacer() // Empuja los marcadores arriba y el botón abajo
             
             //Botón de JUGAR
@@ -67,9 +68,11 @@ struct ContentView: View {
         }
     }
     func guardarDireccion(_ value: DragGesture.Value){
-        if value.translation.width > value.translation.height{
+        if abs(value.translation.width) > abs(value.translation.height){
             direccion[0] = value.translation.width/abs(value.translation.width)
+            direccion[1] = 0
         }else{
+            direccion[0] = 0
             direccion[1] = value.translation.height/abs(value.translation.height)
         }
     }
@@ -125,8 +128,18 @@ struct ContentView: View {
     }
     
     func perder(_ timer:Timer){
-        juegoCorriendo = false
+        //mato el timer
         timer.invalidate()
+        
+        //reseteo las variables
+        juegoCorriendo = false
+        manzanaCoord = randCoord()
+        manzanaComida = false
+        cuerpo = [coord(x:5,y:6),coord(x:5,y:5)]
+        direccion = [0,0]
+        score = 0
+        bodySet = Set(cuerpo[1...])
+        juegoCorriendo = false
     }
     
     func randCoord() -> coord{
